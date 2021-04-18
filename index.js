@@ -1,3 +1,6 @@
+// Credit to https://github.com/regl-project/regl/blob/master/example/life.js
+// For inspiration/help
+
 const glsl = require('glslify');
 let regl = require('regl')();
 
@@ -7,6 +10,9 @@ initcanvas.height = innerHeight;
 const ctx = initcanvas.getContext('2d');
 const {width,height} = initcanvas;
 const r = 50;
+ctx.fillStyle = "#FFFFFF";
+ctx.fillRect(0,0,width,height);
+ctx.fillStyle = "#000000";
 for(let x=(width/2)-r;x<=(width/2)+r;x++) {
   for(let y=(height/2)-r;y<=(height/2)+r;y++) {
     if(Math.floor(Math.random()*2)===0)
@@ -16,6 +22,7 @@ for(let x=(width/2)-r;x<=(width/2)+r;x++) {
 function makeBuf() {
   return regl.framebuffer({
     color: regl.texture(initcanvas),
+    depthStencil: false,
   })
 }
 let back = makeBuf();
@@ -46,6 +53,7 @@ const draw = regl({
     color: [0, 0, 1, 1],
     time: regl.prop('time'),
     front: () => front,
+    ssize: [width,height],
   },
 
   depth: {
@@ -55,6 +63,22 @@ const draw = regl({
   count: 6
 });
 
+// let tick =0;
+// draw({time: tick}, () => {
+//   regl.draw();
+//   update();
+//   let temp = back;
+//   back = front;
+//   front = temp;
+// });
+// draw({time: tick}, () => {
+//   regl.draw();
+//   update();
+//   let temp = back;
+//   back = front;
+//   front = temp;
+// });
+
 regl.frame(function({tick}) {
     regl.clear({
         color: [0, 0, 0, 1]
@@ -63,9 +87,8 @@ regl.frame(function({tick}) {
     draw({time: tick}, () => {
       regl.draw();
       update();
+      let temp = back;
+      back = front;
+      front = temp;
     });
-
-    let temp = back;
-    back = front;
-    front = temp;
 });
