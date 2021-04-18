@@ -5,6 +5,7 @@ precision mediump float;
 varying vec2 vpos;
 uniform vec4 color;
 uniform float time;
+uniform sampler2D front;
 void main() {
-    gl_FragColor = vec4(color.rgb*noise(vec3(vpos*10.0, time*.005)),color.a);
+    gl_FragColor = texture2D(front, vpos);
 }
