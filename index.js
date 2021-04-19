@@ -9,13 +9,13 @@ initcanvas.width = innerWidth;
 initcanvas.height = innerHeight;
 const ctx = initcanvas.getContext('2d');
 const {width,height} = initcanvas;
-const r = 50;
-ctx.fillStyle = "#FFFFFF";
+const r = width;
+ctx.fillStyle = "#00000000";
 ctx.fillRect(0,0,width,height);
-ctx.fillStyle = "#000000";
+ctx.fillStyle = "#FF0000FF";
 for(let x=(width/2)-r;x<=(width/2)+r;x++) {
   for(let y=(height/2)-r;y<=(height/2)+r;y++) {
-    if(Math.floor(Math.random()*2)===0)
+    if(Math.floor(Math.random()*4)===0)
       ctx.fillRect(x,y,1,1);
   }
 }

@@ -7,16 +7,15 @@ void main() {
     float neighbors = 0.0;
     for(int dx=-1;dx<=1;dx++) {
         for(int dy=-1;dy<=1;dy++) {
+            if(dx==0 && dy==0) continue;
             neighbors += texture2D(front, vpos+vec2(dx,dy)/ssize).x;
         }
     }
     float state = texture2D(front, vpos).x;
-    if(neighbors > 3.0 + state || neighbors < 3.0) {
+    if(state==1.0 && neighbors > 3.0 || neighbors < 2.0) {
         state = 0.0;
-    } else {
+    } else if (state==0.0 && neighbors == 3.0) {
         state = 1.0;
     }
-    //state= neighbors/8.0;
-    float color = state;
-    gl_FragColor = vec4(vec3(color),1.0);
+    gl_FragColor = vec4(vec3(state),1.0);
 }

@@ -7,6 +7,6 @@ uniform vec4 color;
 uniform float time;
 uniform sampler2D front;
 void main() {
-    float state = texture2D(front, vpos).x;
+    float state = 1.-texture2D(front, vpos).x;
     gl_FragColor = vec4(vec3(state), 1.0);
 }
