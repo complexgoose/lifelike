@@ -9,16 +9,25 @@ initcanvas.width = innerWidth;
 initcanvas.height = innerHeight;
 const ctx = initcanvas.getContext('2d');
 const {width,height} = initcanvas;
-const r = width;
-ctx.fillStyle = "#00000000";
-ctx.fillRect(0,0,width,height);
-ctx.fillStyle = "#FF0000FF";
+const r = width/4;
+const chance = 1;
+ctx.fillStyle = "#FF0000";
 for(let x=(width/2)-r;x<=(width/2)+r;x++) {
   for(let y=(height/2)-r;y<=(height/2)+r;y++) {
-    if(Math.floor(Math.random()*4)===0)
+    if(Math.floor(Math.random()*chance)===0)
       ctx.fillRect(x,y,1,1);
   }
 }
+function pad(arr, len=9, val=-1) {
+  arr.push(...Array(len-arr.length).fill(val));
+}
+
+let b = [3];
+let s = [0,1,2,3,4,5,6,7];
+pad(b);
+pad(s);
+
+
 function makeBuf() {
   return regl.framebuffer({
     color: regl.texture(initcanvas),
@@ -54,6 +63,8 @@ const draw = regl({
     time: regl.prop('time'),
     front: () => front,
     ssize: [width,height],
+    b,
+    s,
   },
 
   depth: {
