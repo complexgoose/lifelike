@@ -1,16 +1,29 @@
+// Left for reference
 // Credit to https://github.com/regl-project/regl/blob/master/example/life.js
 // For inspiration/help
 
 const glsl = require('glslify');
-let regl = require('regl')();
+const regl = require('regl')();
+const p5 = require('p5');
+
+
+
+function pad(arr, len=9, val=-1) {
+  arr.push(...Array(len-arr.length).fill(val));
+}
 
 const initcanvas = document.createElement("canvas");
 initcanvas.width = innerWidth;
 initcanvas.height = innerHeight;
 const ctx = initcanvas.getContext('2d');
 const {width,height} = initcanvas;
-const r = width/4;
+const r = Math.min(width,height)/4;
 const chance = 1;
+let b = [3];
+let s = [0,1,2,3,4,5,6,7];
+pad(b);
+pad(s);
+
 ctx.fillStyle = "#FF0000";
 for(let x=(width/2)-r;x<=(width/2)+r;x++) {
   for(let y=(height/2)-r;y<=(height/2)+r;y++) {
@@ -18,14 +31,9 @@ for(let x=(width/2)-r;x<=(width/2)+r;x++) {
       ctx.fillRect(x,y,1,1);
   }
 }
-function pad(arr, len=9, val=-1) {
-  arr.push(...Array(len-arr.length).fill(val));
-}
 
-let b = [3];
-let s = [0,1,2,3,4,5,6,7];
-pad(b);
-pad(s);
+
+
 
 
 function makeBuf() {
@@ -73,22 +81,6 @@ const draw = regl({
 
   count: 6
 });
-
-// let tick =0;
-// draw({time: tick}, () => {
-//   regl.draw();
-//   update();
-//   let temp = back;
-//   back = front;
-//   front = temp;
-// });
-// draw({time: tick}, () => {
-//   regl.draw();
-//   update();
-//   let temp = back;
-//   back = front;
-//   front = temp;
-// });
 
 regl.frame(function({tick}) {
     regl.clear({

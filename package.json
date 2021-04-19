@@ -1,16 +1,40 @@
 {
-  "dependencies": {
-    "glsl-noise": "*",
-    "glslify": "^7.1.1",
-    "regl": "^2.1.0"
-  },
+  "name": "gatsby-starter-hello-world",
+  "private": true,
+  "description": "A simplified bare-bones starter for Gatsby",
+  "version": "0.1.0",
+  "license": "0BSD",
   "scripts": {
-    "start": "budo index.js --open --live --wg '**/*.{html,css,js,glsl}' -- --debug",
-    "build": "browserify index.js > docs/bundle.js"
+    "build": "gatsby build",
+    "develop": "gatsby develop",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "start": "npm run develop",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
   },
-  "browserify": {
-    "transform": [
-      "glslify"
-    ]
+  "dependencies": {
+    "bootstrap": "^4.6.0",
+    "gatsby": "^3.2.1",
+    "gatsby-plugin-sass": "^4.3.0",
+    "glsl-noise": "*",
+    "glslify-loader": "^2.0.0",
+    "raw-loader": "^4.0.2",
+    "react": "^17.0.1",
+    "react-bootstrap": "^1.5.2",
+    "react-dom": "^17.0.1",
+    "react-flexview": "^6.0.1",
+    "regl": "^2.1.0",
+    "sass": "^1.32.11"
+  },
+  "devDependencies": {
+    "prettier": "2.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gatsbyjs/gatsby-starter-hello-world"
+  },
+  "bugs": {
+    "url": "https://github.com/gatsbyjs/gatsby/issues"
   }
 }
