@@ -9,7 +9,7 @@ uniform sampler2D front;
 const vec4 white = vec4(1.0,1.0,1.0,1.0);
 
 float posnoise(int z) {
-    return (noise(vec3(vpos, float(z)))/2.)+.5;
+    return (noise(vec3(vpos, float(z)+sin(time)))/2.)+.5;
 }
 
 void main() {

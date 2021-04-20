@@ -19,15 +19,26 @@ function captureNums(rxp, s) {
   return nums;
 }
 
+function getRandomRule() {
+  const b = [];
+  const s = [];
+  for(let x=0;x<=8;x++) {
+    if(Math.random()<.5) b.push(x);
+    if(Math.random()<.5) s.push(x);
+  }
+  return `B${b.join("")}/S${s.join("")}`;
+}
+
 export default class Index extends React.Component {
   constructor() {
     super();
-    this.state = {rule: "B3/S01234567"};
+    this.state = {rule: getRandomRule()};
 
     this.glContainer = React.createRef();
     this.reglTick = null;
 
     this.handleRuleChange = this.handleRuleChange.bind(this);
+    this.handleRandomize = this.handleRandomize.bind(this);
     this.setupGlCanvas = this.setupGlCanvas.bind(this);
   }
 
@@ -103,7 +114,7 @@ export default class Index extends React.Component {
     
       uniforms: {
         color: [0, 0, 1, 1],
-        time: regl.prop('time'),
+        time: ({tick})=>tick*.005,
         front: () => front,
         ssize: [width,height],
         b,
@@ -122,7 +133,7 @@ export default class Index extends React.Component {
             color: [0, 0, 0, 1]
         });    
     
-        draw({time: tick}, () => {
+        draw(() => {
           regl.draw();
           update();
           let temp = back;
@@ -141,7 +152,11 @@ export default class Index extends React.Component {
   }
 
   handleRuleChange(e) {
-    this.setState({rule: e.target.value}, () => this.getRule());
+    this.setState({rule: e.target.value});
+  }
+
+  handleRandomize(e) {
+    this.setState({rule: getRandomRule()}, () => this.setupGlCanvas());
   }
 
   render() {
@@ -154,13 +169,14 @@ export default class Index extends React.Component {
                 {/* Regl will put canvas here */}
               </Flex>
               <Flex>
-                <InputGroup style={{width:"21em"}}>
+                <InputGroup style={{width:"25em"}}>
                   <InputGroup.Prepend>
                     <InputGroup.Text>Rule</InputGroup.Text>
                     
                   </InputGroup.Prepend>
                   <FormControl value={this.state.rule} onChange={this.handleRuleChange} htmlSize={19}/>
                   <InputGroup.Append>
+                    <Button variant="danger" onClick={this.handleRandomize}>Randomize</Button>
                     <Button onClick={this.setupGlCanvas}>Run</Button>
                   </InputGroup.Append>
                 </InputGroup>
