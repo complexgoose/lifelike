@@ -33,15 +33,24 @@ function getRandomRule() {
 export default class Index extends React.Component {
   constructor() {
     super();
-    this.state = {rule: getRandomRule(),reglTick:null,cwidth:null,cheight:null};
+    const params = new URLSearchParams(window.location.search);
+
+    const rule = params.get("rule");
+
+    this.state = {rule: rule || getRandomRule(),
+                  reglTick:null,cwidth:null,cheight:null,
+                  tabKey: "out", bsize:1};
 
     this.glContainer = React.createRef();
     this.p5Container = React.createRef();
 
     this.handleRuleChange = this.handleRuleChange.bind(this);
     this.handleRandomize = this.handleRandomize.bind(this);
+    this.hanldeBSizeChange = this.hanldeBSizeChange.bind(this);
+    this.handleClear = this.handleClear.bind(this);
     this.setupCanvases = this.setupCanvases.bind(this);
     this.setupGlCanvas = this.setupGlCanvas.bind(this);
+    this.setupP5Canvas = this.setupP5Canvas.bind(this);
   }
 
   getRule() {
@@ -66,21 +75,11 @@ export default class Index extends React.Component {
     }
     
     const initcanvas = this.p5Container.current.getElementsByTagName("canvas")[0];
-    const ctx = initcanvas.getContext('2d');
     const {width,height} = initcanvas;
-    const r = Math.min(width,height)/4;
-    const chance = 1;
     let [b,s] = this.getRule();
     pad(b);
     pad(s);
     
-    // ctx.fillStyle = "#FF0000";
-    // for(let x=(width/2)-r;x<=(width/2)+r;x++) {
-    //   for(let y=(height/2)-r;y<=(height/2)+r;y++) {
-    //     if(Math.floor(Math.random()*chance)===0)
-    //       ctx.fillRect(x,y,1,1);
-    //   }
-    // }
 
     function makeBuf() {
       return regl.framebuffer({
@@ -144,28 +143,51 @@ export default class Index extends React.Component {
     this.setState({reglTick});
   }
 
-  setupP5Canvas() {
+  setupP5Canvas(init=false) {
     const node = this.p5Container.current.getElementsByTagName("canvas")[0];
     if(node !== undefined) node.remove();
     new p5((sketch) => {
       sketch.setup = () => {
         sketch.createCanvas(this.state.cwidth, this.state.cheight);
+        sketch.fill(255,0,0);
         sketch.stroke(255,0,0);
+        sketch.rectMode(sketch.CENTER);
+        if(init) {
+          let r = sketch.min(sketch.width,sketch.height)/2;
+          sketch.square(sketch.width/2,sketch.height/2,r);
+        }
+      }
+
+      sketch.isClicking = () => {
+        const {mouseX, mouseY, width, height} = sketch;
+        return sketch.mouseButton === sketch.LEFT &&
+        this.state.tabKey==="setup" &&
+        mouseX >= 0 && mouseX<width &&
+        mouseY >= 0 && mouseY<height;
       }
 
       sketch.mousePressed = () => {
-        if(sketch.mouseButton === sketch.LEFT) {
-          sketch.point(sketch.mouseX, sketch.mouseY);
-          sketch.print(sketch.mouseX, sketch.mouseY);
+        const {mouseX, mouseY} = sketch;
+        if(sketch.isClicking()) {
+          sketch.square(mouseX,mouseY,this.state.bsize);
         }
       }
+
+      sketch.mouseDragged = () => {
+        const {mouseX,mouseY} = sketch;
+        if(sketch.isClicking()) {
+          sketch.square(mouseX,mouseY,this.state.bsize);
+        }
+      }
+
+
     }, this.p5Container.current);
   }
 
   setupCanvases() {
     const container = this.glContainer.current;
     this.setState({cwidth:container.clientWidth, cheight:container.clientHeight}, () => {
-      this.setupP5Canvas();
+      this.setupP5Canvas(true);
       this.setupGlCanvas();
     });
   }
@@ -182,10 +204,19 @@ export default class Index extends React.Component {
     this.setState({rule: getRandomRule()}, () => this.setupGlCanvas());
   }
 
+  hanldeBSizeChange(e) {
+    this.setState({bsize: e.target.value})
+  }
+
+  handleClear(e) {
+    this.setupP5Canvas();
+  }
+
   render() {
     return (
       <Flex column className="Full">
-        <Tabs defaultActiveKey="out">
+        <Tabs activeKey={this.state.tabKey} 
+              onSelect={(k)=>this.setState({tabKey:k})}>
           <Tab eventKey="out" title="Output">
             <Flex column className="Full">
               <Flex grow ref={this.glContainer}>
@@ -195,7 +226,6 @@ export default class Index extends React.Component {
                 <InputGroup style={{width:"25em"}}>
                   <InputGroup.Prepend>
                     <InputGroup.Text>Rule</InputGroup.Text>
-                    
                   </InputGroup.Prepend>
                   <FormControl value={this.state.rule} onChange={this.handleRuleChange} htmlSize={19}/>
                   <InputGroup.Append>
@@ -209,7 +239,16 @@ export default class Index extends React.Component {
           <Tab eventKey="setup" title="Setup">
             <Flex column className="Full">
               <Flex grow ref={this.p5Container}>
-
+                {/* p5 will put canvas here */}
+              </Flex>
+              <Flex style={{width:"30em"}}>
+                <Button variant="danger" onClick={this.handleClear}>Clear</Button>
+                <InputGroup.Prepend>
+                  <InputGroup.Text>Brush Size</InputGroup.Text>
+                </InputGroup.Prepend>
+                <FormControl type="range" value={this.state.bsize}
+                 min={1} max={Math.min(this.state.cwidth,this.state.cheight)/2}
+                 onChange={this.hanldeBSizeChange}/>
               </Flex>
             </Flex>
           </Tab>
