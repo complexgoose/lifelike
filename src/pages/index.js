@@ -7,6 +7,7 @@ import fragsrc from '../shaders/frag.glsl';
 import vertsrc from '../shaders/vert.glsl';
 import updatesrc from '../shaders/update.glsl';
 import makeregl from 'regl';
+import p5 from 'p5';
 
 
 function captureNums(rxp, s) {
@@ -32,13 +33,14 @@ function getRandomRule() {
 export default class Index extends React.Component {
   constructor() {
     super();
-    this.state = {rule: getRandomRule()};
+    this.state = {rule: getRandomRule(),reglTick:null,cwidth:null,cheight:null};
 
     this.glContainer = React.createRef();
-    this.reglTick = null;
+    this.p5Container = React.createRef();
 
     this.handleRuleChange = this.handleRuleChange.bind(this);
     this.handleRandomize = this.handleRandomize.bind(this);
+    this.setupCanvases = this.setupCanvases.bind(this);
     this.setupGlCanvas = this.setupGlCanvas.bind(this);
   }
 
@@ -51,21 +53,19 @@ export default class Index extends React.Component {
 
   setupGlCanvas() {
     const container = this.glContainer.current;
-    if(this.reglTick !== null) this.reglTick.cancel();
+    if(this.state.reglTick !== null) this.state.reglTick.cancel();
     let node = container.getElementsByTagName("canvas")[0];
     if(node !== undefined) node.remove();
     node = document.createElement("canvas");
-    node.width = container.clientWidth;
-    node.height = container.clientHeight;
+    node.width = this.state.cwidth;
+    node.height = this.state.cheight;
     container.appendChild(node);
     const regl = makeregl(node);
     function pad(arr, len=9, val=-1) {
       arr.push(...Array(len-arr.length).fill(val));
     }
     
-    const initcanvas = document.createElement("canvas");
-    initcanvas.width = container.clientWidth;
-    initcanvas.height = container.clientHeight;
+    const initcanvas = this.p5Container.current.getElementsByTagName("canvas")[0];
     const ctx = initcanvas.getContext('2d');
     const {width,height} = initcanvas;
     const r = Math.min(width,height)/4;
@@ -74,13 +74,13 @@ export default class Index extends React.Component {
     pad(b);
     pad(s);
     
-    ctx.fillStyle = "#FF0000";
-    for(let x=(width/2)-r;x<=(width/2)+r;x++) {
-      for(let y=(height/2)-r;y<=(height/2)+r;y++) {
-        if(Math.floor(Math.random()*chance)===0)
-          ctx.fillRect(x,y,1,1);
-      }
-    }
+    // ctx.fillStyle = "#FF0000";
+    // for(let x=(width/2)-r;x<=(width/2)+r;x++) {
+    //   for(let y=(height/2)-r;y<=(height/2)+r;y++) {
+    //     if(Math.floor(Math.random()*chance)===0)
+    //       ctx.fillRect(x,y,1,1);
+    //   }
+    // }
 
     function makeBuf() {
       return regl.framebuffer({
@@ -128,7 +128,7 @@ export default class Index extends React.Component {
       count: 6
     });
     
-    this.reglTick = regl.frame(function({tick}) {
+    const reglTick = regl.frame(function({tick}) {
         regl.clear({
             color: [0, 0, 0, 1]
         });    
@@ -141,14 +141,37 @@ export default class Index extends React.Component {
           front = temp;
         });
     });
+    this.setState({reglTick});
   }
 
   setupP5Canvas() {
+    const node = this.p5Container.current.getElementsByTagName("canvas")[0];
+    if(node !== undefined) node.remove();
+    new p5((sketch) => {
+      sketch.setup = () => {
+        sketch.createCanvas(this.state.cwidth, this.state.cheight);
+        sketch.stroke(255,0,0);
+      }
 
+      sketch.mousePressed = () => {
+        if(sketch.mouseButton === sketch.LEFT) {
+          sketch.point(sketch.mouseX, sketch.mouseY);
+          sketch.print(sketch.mouseX, sketch.mouseY);
+        }
+      }
+    }, this.p5Container.current);
+  }
+
+  setupCanvases() {
+    const container = this.glContainer.current;
+    this.setState({cwidth:container.clientWidth, cheight:container.clientHeight}, () => {
+      this.setupP5Canvas();
+      this.setupGlCanvas();
+    });
   }
 
   componentDidMount() {
-    this.setupGlCanvas();
+    this.setupCanvases();
   }
 
   handleRuleChange(e) {
@@ -184,7 +207,11 @@ export default class Index extends React.Component {
             </Flex>
           </Tab>
           <Tab eventKey="setup" title="Setup">
+            <Flex column className="Full">
+              <Flex grow ref={this.p5Container}>
 
+              </Flex>
+            </Flex>
           </Tab>
         </Tabs>
       </Flex>
