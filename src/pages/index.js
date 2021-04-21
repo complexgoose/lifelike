@@ -191,7 +191,9 @@ export default class Index extends React.Component {
     const params = new URLSearchParams(window.location.search);
     const rule = params.get("rule");
     const warningDismissed = window.localStorage.getItem("warningDismissed");
-    this.setState({cwidth:container.clientWidth, cheight:container.clientHeight, window, rule, warningDismissed}, () => {
+    const newState = {cwidth:container.clientWidth, cheight:container.clientHeight, window, rule, warningDismissed};
+    if(!rule) delete newState.rule;
+    this.setState(newState, () => {
       this.setupP5Canvas(true);
       this.setupGlCanvas();
       if(!this.state.warningDismissed) this.setState({tabKey:"about"});
