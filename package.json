@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "gatsby build && npm run dist",
+    "build": "gatsby build --prefix-paths && npm run dist",
     "dist": "rm -rf docs && cp -r public docs",
     "develop": "gatsby develop",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
