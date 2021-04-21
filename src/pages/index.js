@@ -34,15 +34,11 @@ function getRandomRule() {
 export default class Index extends React.Component {
   constructor() {
     super();
-    const params = new URLSearchParams(window.location.search);
 
-    const rule = params.get("rule");
-    const warningDismissed = window.localStorage.getItem("warningDismissed");
-
-    this.state = {rule: rule || getRandomRule(),
+    this.state = {rule: getRandomRule(),
                   reglTick:null,cwidth:null,cheight:null,
                   tabKey: "out", bsize:1,
-                  warningDismissed};
+                  warningDismissed: false};
 
     this.glContainer = React.createRef();
     this.p5Container = React.createRef();
@@ -192,7 +188,10 @@ export default class Index extends React.Component {
 
   setupCanvases() {
     const container = this.glContainer.current;
-    this.setState({cwidth:container.clientWidth, cheight:container.clientHeight}, () => {
+    const params = new URLSearchParams(window.location.search);
+    const rule = params.get("rule");
+    const warningDismissed = window.localStorage.getItem("warningDismissed");
+    this.setState({cwidth:container.clientWidth, cheight:container.clientHeight, window, rule, warningDismissed}, () => {
       this.setupP5Canvas(true);
       this.setupGlCanvas();
       if(!this.state.warningDismissed) this.setState({tabKey:"about"});
@@ -228,24 +227,24 @@ export default class Index extends React.Component {
   updateURL() {
     const params = new URLSearchParams();
     params.set("rule", this.state.rule);
-    const {origin,pathname} = window.location;
+    const {origin,pathname} = this.state.window.location;
     const url = `${origin+pathname}?${params.toString()}`
-    window.history.replaceState({path:url},'',url);
+    this.state.window.history.replaceState({path:url},'',url);
   }
 
   handleShare(e) {
     this.updateURL();
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(this.state.window.location.href);
   }
 
   handleWarningDismiss(e) {
-    window.localStorage.setItem("warningDismissed", true);
+    this.state.window.localStorage.setItem("warningDismissed", true);
     this.setState({warningDismissed: true});
   }
 
   handleTabSelect(k) {
     if(k==="link") {
-      window.open("https://jack.strosahl.org", "_blank");
+      this.state.window.open("https://jack.strosahl.org", "_blank");
     } else {
       this.setState({tabKey:k});
     }
